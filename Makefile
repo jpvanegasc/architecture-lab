@@ -23,5 +23,8 @@ envsetup: .env $(VENV_DIR)
 lint: $(VENV_DIR) ## Run linters via pre-commit
 	$(VENV_RUN) pre-commit run --all-files
 
+test: ## Run tests
+	APIURL=http://localhost:8000 bash tests/run-api-tests.sh
+
 help: ## Show this help message
 	grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
