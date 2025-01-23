@@ -3,16 +3,19 @@ from typing import Annotated
 
 from fastapi import Depends
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, declarative_base, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from app.config import settings
 
 logger = logging.getLogger(__name__)
 
 
+class Base(DeclarativeBase):
+    pass
+
+
 engine = create_engine(settings.database_url())
 SessionLocal = sessionmaker(autocommit=False, autoflush=True, bind=engine)
-Base = declarative_base()
 
 
 def db_session() -> Session:
