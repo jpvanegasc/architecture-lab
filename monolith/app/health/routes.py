@@ -3,10 +3,10 @@ from sqlalchemy import text
 
 from app.db import DatabaseSession
 
-router = APIRouter()
+router = APIRouter(prefix="/health", tags=["Health"])
 
 
-@router.get("/health/db")
+@router.get("/db")
 def health(db: DatabaseSession):
     try:
         db.execute(text("SELECT 1"))
