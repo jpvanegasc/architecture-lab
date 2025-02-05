@@ -99,7 +99,13 @@ def create_comment(slug: str):
     return {"message": f"Create comment for article {slug}"}
 
 
-@router.get("/{slug}/comments")
+@router.get(
+    "/{slug}/comments",
+    response_model=ListCommentsResponse,
+    status_code=status.HTTP_200_OK,
+    description="Get all comments for an article",
+    responses={status.HTTP_200_OK: {"description": "Return all comments"}},
+)
 def get_comments(db: DatabaseSession, slug: str):
     query = db.query(Comment).join(Article).filter(Article.slug == slug)
     comments = query.all()
