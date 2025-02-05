@@ -1,19 +1,41 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, status
+
+from app.articles.models import Article, ArticleTag, Tag
+from app.articles.schemas import ArticleOut, ListArticlesResponse
+from app.db import DatabaseSession
+from app.users.models import User
 
 router = APIRouter(prefix="/articles", tags=["Articles"])
 
 
-@router.get("")
+@router.get(
+    "",
+    response_model=ListArticlesResponse,
+    status_code=status.HTTP_200_OK,
+    description="Get all articles",
+    responses={status.HTTP_200_OK: {"description": "Return all articles"}},
+)
 def get_articles(
-    author: str | None = None, favorited: str | None = None, tag: str | None = None
+    db: DatabaseSession,
+    author: str | None = None,
+    favorited: str | None = None,
+    tag: str | None = None,
 ):
-    # TODO
-    return {
-        "message": "Get all articles",
-        "author": author,
-        "favorited": favorited,
-        "tag": tag,
-    }
+    query = db.query(Article)
+
+    if author:
+        query = query.join(User).filter(User.username == author)
+    if favorited:
+        query = query.join(User).filter(User.username == favorited)
+    if tag:
+        query = query.join(ArticleTag).join(Tag).filter(Tag.tag == tag)
+
+    articles = query.all()
+    count = query.count()
+
+    return ListArticlesResponse(
+        articles=[ArticleOut.model_validate(a) for a in articles], articles_count=count
+    )
 
 
 @router.post("")
