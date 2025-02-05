@@ -1,7 +1,13 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, HTTPException, status
 
-from app.articles.models import Article, ArticleTag, Tag
-from app.articles.schemas import ArticleOut, ListArticlesResponse
+from app.articles.models import Article, ArticleTag, Comment, Tag
+from app.articles.schemas import (
+    ArticleOut,
+    CommentOut,
+    ListArticlesResponse,
+    ListCommentsResponse,
+    SingleArticleResponse,
+)
 from app.db import DatabaseSession
 from app.users.models import User
 
@@ -44,15 +50,28 @@ def create_article():
     return {"message": "Create an article"}
 
 
-@router.get("/{slug}")
-def get_article(slug: str):
-    # TODO
-    return {"message": f"Get article {slug}"}
+@router.get(
+    "/{slug}",
+    response_model=SingleArticleResponse,
+    status_code=status.HTTP_200_OK,
+    description="Get an article by slug",
+    responses={
+        status.HTTP_200_OK: {"description": "Return the article"},
+        status.HTTP_404_NOT_FOUND: {"description": "Article not found"},
+    },
+)
+def get_article(db: DatabaseSession, slug: str):
+    article = db.query(Article).filter(Article.slug == slug).first()
+    if not article:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Article not found"
+        )
+    return SingleArticleResponse(article=ArticleOut.model_validate(article))
 
 
 @router.get("/feed")
 def get_feed():
-    # TODO
+    # TODO: same as get_articles but for uses the token to filter the articles
     return {"message": "Get feed"}
 
 
@@ -81,9 +100,13 @@ def create_comment(slug: str):
 
 
 @router.get("/{slug}/comments")
-def get_comments(slug: str):
-    # TODO
-    return {"message": f"Get comments for article {slug}"}
+def get_comments(db: DatabaseSession, slug: str):
+    query = db.query(Comment).join(Article).filter(Article.slug == slug)
+    comments = query.all()
+    count = query.count()
+    return ListCommentsResponse(
+        comments=[CommentOut.model_validate(c) for c in comments], comments_count=count
+    )
 
 
 @router.delete("/{slug}/comments/{comment_id}")

@@ -21,3 +21,20 @@ class ArticleOut(BaseAPIResponse):
 class ListArticlesResponse(BaseModel):
     articles: list[ArticleOut]
     articles_count: Annotated[int, Field(serialization_alias="articlesCount")]
+
+
+class SingleArticleResponse(BaseModel):
+    article: ArticleOut
+
+
+class CommentOut(BaseAPIResponse):
+    id: int
+    body: str
+    created_at: Annotated[datetime, Field(serialization_alias="createdAt")]
+    updated_at: Annotated[datetime, Field(serialization_alias="updatedAt")]
+    author: str
+
+
+class ListCommentsResponse(BaseModel):
+    comments: list[CommentOut]
+    comments_count: Annotated[int, Field(serialization_alias="commentsCount")]
