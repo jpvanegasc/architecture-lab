@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 
 from sqlalchemy import ForeignKey
@@ -18,10 +19,16 @@ class Article(Base):
     body: Mapped[str] = mapped_column()
 
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(onupdate=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
     author = relationship("User", back_populates="articles")
-    tags = relationship("Tag", secondary="article_tags")
+    tag_list = relationship("Tag", secondary="article_tags")
+
+    @staticmethod
+    def slugify(title: str) -> str:
+        return re.sub(r"[^\w]+", "-", title.lower())
 
 
 class Tag(Base):
@@ -64,4 +71,6 @@ class Comment(Base):
     body: Mapped[str] = mapped_column()
 
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(onupdate=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow, onupdate=datetime.utcnow
+    )

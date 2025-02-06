@@ -62,11 +62,11 @@ def create_article(db: DatabaseSession, create_payload: SingleArticleCreate):
         description=article_payload.description,
         body=article_payload.body,
         author_id=1,  # TODO: get the author from the token
-        tags=tags,
+        tag_list=tags,
+        slug=Article.slugify(article_payload.title),
     )
     db.add(article)
     db.commit()
-    db.refresh(article)
     return SingleArticleResponse(article=ArticleOut.model_validate(article))
 
 
