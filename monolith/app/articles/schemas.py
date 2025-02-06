@@ -1,7 +1,7 @@
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.schemas import BaseAPIResponse
 
@@ -14,8 +14,22 @@ class ArticleOut(BaseAPIResponse):
     description: str
     tag_list: Annotated[list[str], Field(serialization_alias="tagList")]
     author: str
-    favorited: bool  # TODO: verify if this is correct
-    favorites_count: Annotated[int, Field(serialization_alias="favoritesCount")]
+    favorited: Optional[bool] = None  # TODO: verify if this is correct
+    favorites_count: Annotated[
+        Optional[int], Field(None, serialization_alias="favoritesCount")
+    ]
+
+    @field_validator("tag_list", mode="before")
+    @classmethod
+    def validate_tag_list(cls, value):
+        if not value:
+            return []
+        return [tag.tag for tag in value]
+
+    @field_validator("author", mode="before")
+    @classmethod
+    def validate_author(cls, value):
+        return value.username
 
 
 class ArticleCreate(BaseModel):
