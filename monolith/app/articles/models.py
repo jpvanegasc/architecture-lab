@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
 
@@ -19,6 +19,9 @@ class Article(Base):
 
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(onupdate=datetime.utcnow)
+
+    author = relationship("User", back_populates="articles")
+    tags = relationship("Tag", secondary="article_tags")
 
 
 class Tag(Base):
