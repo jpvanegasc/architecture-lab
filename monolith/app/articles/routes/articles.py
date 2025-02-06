@@ -6,8 +6,10 @@ from app.articles.schemas import (
     CommentOut,
     ListArticlesResponse,
     ListCommentsResponse,
+    SingleArticleCreate,
     SingleArticleResponse,
 )
+from app.articles.services import get_or_create_tags
 from app.db import DatabaseSession
 from app.users.models import User
 
@@ -44,10 +46,28 @@ def get_articles(
     )
 
 
-@router.post("")
-def create_article():
-    # TODO
-    return {"message": "Create an article"}
+@router.post(
+    "",
+    response_model=SingleArticleResponse,
+    status_code=status.HTTP_201_CREATED,
+    description="Create an article",
+    responses={status.HTTP_201_CREATED: {"description": "Return the created article"}},
+)
+def create_article(db: DatabaseSession, create_payload: SingleArticleCreate):
+    article_payload = create_payload.article
+    tags = get_or_create_tags(db, article_payload.tag_list)
+
+    article = Article(
+        title=article_payload.title,
+        description=article_payload.description,
+        body=article_payload.body,
+        author_id=1,  # TODO: get the author from the token
+        tags=tags,
+    )
+    db.add(article)
+    db.commit()
+    db.refresh(article)
+    return SingleArticleResponse(article=ArticleOut.model_validate(article))
 
 
 @router.get(

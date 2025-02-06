@@ -18,6 +18,13 @@ class ArticleOut(BaseAPIResponse):
     favorites_count: Annotated[int, Field(serialization_alias="favoritesCount")]
 
 
+class ArticleCreate(BaseModel):
+    title: str
+    description: str
+    body: str
+    tag_list: list[str]
+
+
 class ListArticlesResponse(BaseModel):
     articles: list[ArticleOut]
     articles_count: Annotated[int, Field(serialization_alias="articlesCount")]
@@ -25,6 +32,10 @@ class ListArticlesResponse(BaseModel):
 
 class SingleArticleResponse(BaseModel):
     article: ArticleOut
+
+
+class SingleArticleCreate(BaseModel):
+    article: ArticleCreate
 
 
 class CommentOut(BaseAPIResponse):
