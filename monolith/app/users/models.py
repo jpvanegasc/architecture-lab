@@ -14,13 +14,22 @@ class User(Base):
     password: Mapped[str] = mapped_column()
 
     email: Mapped[str] = mapped_column(unique=True)
-    bio: Mapped[str]
+    bio: Mapped[str] = mapped_column(nullable=True)
     image_url: Mapped[str] = mapped_column(nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(onupdate=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
     articles = relationship("Article", back_populates="author")
+
+    @classmethod
+    def safe_create(cls, **kwargs):
+        # TODO: hash password
+        raw_password = kwargs.pop("password")
+        user = cls(**kwargs, password=raw_password)
+        return user
 
 
 class Follower(Base):
