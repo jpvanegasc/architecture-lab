@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     DATABASE_PORT: str = "5432"
     DATABASE_NAME: str = "monolith_db"
 
+    SECRET_KEY: str = "jwt-secret-key"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
+
     def database_url(self):
         return f"postgresql://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}@{self.DATABASE_HOST}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
 

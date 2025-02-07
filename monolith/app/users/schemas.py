@@ -21,3 +21,8 @@ class SingleUserResponse(BaseAPIResponse):
 
 class SingleUserCreate(BaseModel):
     user: UserCreate
+
+
+class AccessToken(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
