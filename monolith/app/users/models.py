@@ -4,6 +4,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
+from app.security import get_password_hash
 
 
 class User(Base):
@@ -26,9 +27,11 @@ class User(Base):
 
     @classmethod
     def safe_create(cls, **kwargs):
-        # TODO: hash password
         raw_password = kwargs.pop("password")
-        user = cls(**kwargs, password=raw_password)
+        if not raw_password:
+            raise ValueError("password required")
+        password = get_password_hash(raw_password)
+        user = cls(**kwargs, password=password)
         return user
 
 
