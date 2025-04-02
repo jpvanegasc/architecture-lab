@@ -39,7 +39,13 @@ def register(db: DatabaseSession, create_payload: SingleUserCreate):
     return SingleUserResponse(user=UserOut.model_validate(user))
 
 
-@router.post("/users/login")
+@router.post(
+    "/users/login",
+    response_model=AccessToken,
+    status_code=status.HTTP_200_OK,
+    description="Login",
+    responses={status.HTTP_200_OK: {"description": "Return the access token"}},
+)
 def login(
     db: DatabaseSession, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
 ):
