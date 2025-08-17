@@ -1,14 +1,17 @@
 from datetime import timedelta
-from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, HTTPException, status
 
 from app.config import settings
 from app.db import DatabaseSession
 from app.security import create_access_token, verify_password
 from app.users.models import User
-from app.users.schemas import AccessToken, SingleUserCreate, SingleUserResponse, UserOut
+from app.users.schemas import (
+    SingleUserCreate,
+    SingleUserLogin,
+    SingleUserResponse,
+    UserOut,
+)
 
 router = APIRouter(tags=["Auth"])
 
@@ -36,30 +39,51 @@ def register(db: DatabaseSession, create_payload: SingleUserCreate):
     db.add(user)
     db.commit()
     db.refresh(user)
-    return SingleUserResponse(user=UserOut.model_validate(user))
+
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    token = create_access_token(user.id, access_token_expires)
+
+    return SingleUserResponse(
+        user=UserOut(
+            username=user.username,
+            email=user.email,
+            bio=user.bio,
+            image=user.image_url,
+            token=token,
+        )
+    )
 
 
 @router.post(
     "/users/login",
-    response_model=AccessToken,
+    response_model=SingleUserResponse,
     status_code=status.HTTP_200_OK,
     description="Login",
     responses={status.HTTP_200_OK: {"description": "Return the access token"}},
 )
-def login(
-    db: DatabaseSession, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
-):
-    user = db.query(User).filter(User.username == form_data.username).first()
+def login(db: DatabaseSession, form_data: SingleUserLogin):
+    user = db.query(User).filter(User.email == form_data.user.email).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Bad username or password"
         )
-    if not verify_password(form_data.password, user.password):
+    if not verify_password(form_data.user.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Bad username or password"
         )
+
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    return AccessToken(access_token=create_access_token(user.id, access_token_expires))
+    token = create_access_token(user.id, access_token_expires)
+
+    return SingleUserResponse(
+        user=UserOut(
+            username=user.username,
+            email=user.email,
+            bio=user.bio,
+            image=user.image_url,
+            token=token,
+        )
+    )
 
 
 @router.post("/user")

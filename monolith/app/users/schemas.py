@@ -1,12 +1,19 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 from app.schemas import BaseAPIResponse
 
 
+class UserLoginIn(BaseModel):
+    email: EmailStr
+    password: str
+
+
 class UserOut(BaseAPIResponse):
-    id: int
     username: str
     email: str
+    bio: str | None
+    image: str | None
+    token: str
 
 
 class UserCreate(BaseModel):
@@ -15,14 +22,13 @@ class UserCreate(BaseModel):
     password: str
 
 
+class SingleUserLogin(BaseModel):
+    user: UserLoginIn
+
+
 class SingleUserResponse(BaseAPIResponse):
     user: UserOut
 
 
 class SingleUserCreate(BaseModel):
     user: UserCreate
-
-
-class AccessToken(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
