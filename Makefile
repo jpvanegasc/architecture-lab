@@ -1,27 +1,18 @@
 .DEFAULT_GOAL := help
 
-VENV_DIR ?= .venv
-VENV_ACTIVATE = $(VENV_DIR)/bin/activate
-VENV_RUN = . $(VENV_ACTIVATE);
-
 .SILENT:
 
 .env:
 	cp .sample.env .env
 
-$(VENV_DIR):
-	test -d $(VENV_DIR) || python3 -m venv $(VENV_DIR)
-
 .PHONY:
 
-envsetup: .env $(VENV_DIR)
-	$(VENV_RUN) pip install --upgrade pip
-	$(VENV_RUN) pip install -r requirements/dev.txt
-	$(VENV_RUN) pip install -r requirements/main.txt
-	$(VENV_RUN) pre-commit install
+init: .env
+	uv sync
+	uv run pre-commit install
 
-lint: $(VENV_DIR) ## Run linters via pre-commit
-	$(VENV_RUN) pre-commit run --all-files
+lint: ## Run linters via pre-commit
+	uv run pre-commit run --all-files
 
 test: ## Run tests
 	APIURL=http://localhost:8000 bash tests/run-api-tests.sh

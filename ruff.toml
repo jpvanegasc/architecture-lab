@@ -1,0 +1,7 @@
+[lint]
+# pyflakes, pycodestyle, isort
+select = ["F", "E", "W", "I001", "B"]
+
+[lint.isort]
+known-first-party = ["app"]
+known-third-party = ["alembic", "fastapi", "sqlalchemy"]

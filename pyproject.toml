@@ -1,11 +1,20 @@
-[tool.mypy]
-ignore_missing_imports = true
-namespace_packages = false
+[project]
+name = "architecture-lab"
+version = "0.1.0"
+description = "Playground for testing and learning different backend architectures."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.14.1",
+    "fastapi[standard]>=0.115.6",
+    "jwt>=1.4.0",
+    "passlib>=1.7.4",
+    "psycopg2-binary>=2.9.10",
+    "pydantic-settings>=2.7.1",
+    "sqlalchemy>=2.0.37",
+]
 
-[tool.ruff.lint]
-# pyflakes, pycodestyle, isort
-select = ["F", "E", "W", "I001", "B"]
-
-[tool.ruff.lint.isort]
-known-first-party = ["app"]
-known-third-party = ["alembic", "fastapi", "sqlalchemy"]
+[dependency-groups]
+dev = [
+    "pre-commit>=4.3.0",
+]
