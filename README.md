@@ -1,7 +1,7 @@
 # Architecture Lab
 This project contains an implementation of the [RealWorld project](https://github.com/gothinkster/realworld) backend in different architectures, to compare and contrast the differences between them. It uses Python with FastAPI for the backend framework and Postgres with SQLAlchemy for the database.
 
-### 📖 Table of
+### 📖 Table Of Contents
 - 👀 [Overview](#-overview)
 - 🪨 [Monolith](#-monolith)
 
