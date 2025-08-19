@@ -1,10 +1,12 @@
 from datetime import timedelta
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.config import settings
 from app.db import DatabaseSession
 from app.security import create_access_token, verify_password
+from app.users.dependencies import get_current_user
 from app.users.models import User
 from app.users.schemas import (
     SingleUserCreate,
@@ -86,9 +88,26 @@ def login(db: DatabaseSession, form_data: SingleUserLogin):
     )
 
 
-@router.post("/user")
-def get_current_user():
-    return {"message": "Get current user"}
+@router.get(
+    "/user",
+    response_model=SingleUserResponse,
+    status_code=status.HTTP_200_OK,
+    description="Get current user",
+    responses={status.HTTP_200_OK: {"description": "Return the current user"}},
+)
+def get_current_user_(user: Annotated[User, Depends(get_current_user)]):
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    token = create_access_token(user.id, access_token_expires)
+
+    return SingleUserResponse(
+        user=UserOut(
+            username=user.username,
+            email=user.email,
+            bio=user.bio,
+            image=user.image_url,
+            token=token,
+        )
+    )
 
 
 @router.put("/user")
